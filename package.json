@@ -1,0 +1,31 @@
+{
+  "name": "stomp-message-forwarder",
+  "version": "1.0.0",
+  "description": "utility to foward message from a destination to another",
+  "main": "index.js",
+  "bin": {
+    "forwarder": "./cmd.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bimedia-fr/stomp-message-forwarder.git"
+  },
+  "keywords": [
+    "forward",
+    "stomp",
+    "message"
+  ],
+  "author": "jerome creignou",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/bimedia-fr/stomp-message-forwarder/issues"
+  },
+  "homepage": "https://github.com/bimedia-fr/stomp-message-forwarder#readme",
+  "dependencies": {
+    "stompit": "^1.0.0",
+    "yargs": "^15.3.1"
+  }
+}
