@@ -17,6 +17,14 @@ const argv = require('yargs')
         alias: 'max',
         description: 'max redelivery',
         default: 1
+    }).option('d', {
+        alias: 'delay',
+        description: 'delay between messages delivery',
+        default: 1
+    }).option('n', {
+        alias: 'number',
+        description: 'number of messages to deliver',
+        default: 10
     }).argv;
 
 if(!argv._[0]) {
@@ -26,7 +34,7 @@ if(!argv._[0]) {
 }
 
 const MessageForwarder = require('./index');
-let forwarder = new MessageForwarder(argv.h, argv.p, {timeout: argv.t, maxDelivery: 1});
+let forwarder = new MessageForwarder(argv.h, argv.p, {timeout: argv.t, maxDelivery: 1, num: argv.n, delay: 500});
 forwarder.connect().then(() => {
     forwarder.forward(argv._[0], argv._[1]);
 });
