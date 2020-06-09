@@ -30,12 +30,19 @@ class MessageForwarder {
                 if (error) {
                     return reject(error);
                 }
-                console.log('connected to', this.host, 'on', this.port);
+                console.info('connected to', this.host, 'on', this.port);
                 this.client = client;
                 return resolve(client);
             });
         });
     }
+
+    close() {
+        this.client.disconnect(() => {
+            console.info('disconnected');
+        });
+    }
+
     _readMessage(message) {
         return new Promise((resolve, reject) => {
             message.readString('utf-8', (error, body) => {
@@ -53,9 +60,9 @@ class MessageForwarder {
             'content-type': 'text/plain',
             'redelivery-count':  (+message.headers['redelivery-count'] || 0) + 1
         });
-        if(Number(message.headers['redelivery-count']) >= this.maxDelivery) {
+        /*if(Number(message.headers['redelivery-count']) >= this.maxDelivery) {
             return console.log('not forwarding message',  message.headers['message-id'], 'max redelivery reached', message.headers['redelivery-count']);
-        }
+        }*/
         console.log('forwarding message with id:', message.headers['message-id'], 'to', to);
         if(this.count++ < this.num) {
             const frame = this.client.send(headers);
@@ -69,6 +76,7 @@ class MessageForwarder {
         if (!this.client) {
             return Promise.reject(new Error('not connected'));
         }
+        let timedout;
         this.client.subscribe({
             'destination': from,
             'ack': 'client-individual'
@@ -77,6 +85,9 @@ class MessageForwarder {
                 console.log('subscribe error ' + error.message);
                 return;
             }
+            if (timedout) {
+                clearTimeout(timedout);
+            }
             console.log('received message', message.headers['message-id'], message.headers);
             this._readMessage(message)
                 .then(this._sendAndAck.bind(this, message, (to || message.headers['original-destination'])))
@@ -84,9 +95,9 @@ class MessageForwarder {
 
                     if(this.count >= this.num) {
                         console.log('done', this.count, 'messages');
-                        this.client.disconnect(() => {
-                            console.log('disconnected');
-                        });
+                        this.close();
+                    } else {
+                        timedout = setTimeout(this.close.bind(this), this.timeout);
                     }
                 }).catch(console.log);
         });
